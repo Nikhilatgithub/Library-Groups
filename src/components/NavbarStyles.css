@@ -1,0 +1,16 @@
+.navbg-component {
+    /* The image used */
+    flex: 1;
+    /* background-image: url(../assets/books bg.jpg); */
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.footerImg{
+    background-image: url(../assets/books bg.jpg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}

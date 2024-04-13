@@ -1,8 +1,10 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import {  createContext, useContext } from "react";
-import {  doc,setDoc, getFirestore,collection, getDoc, query, where, onSnapshot, addDoc } from "firebase/firestore";
+import {  createContext, useContext, useState } from "react";
+import { getAuth ,signOut,onAuthStateChanged,signInWithEmailAndPassword, createUserWithEmailAndPassword} from "firebase/auth";
+import {  doc,setDoc, getFirestore,collection, query, addDoc, getDocs } from "firebase/firestore";
 import Book from "./BookDAO"
+
 // import { getAnalytics } from "firebase/analytics";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -34,11 +36,15 @@ const getFirestoreData=()=>
  return firestore;
 };
 
+const auth = getAuth(app);
+
 const getCurrentMonthID = () => {
   const currentDate = new Date();
   const m=currentDate.getMonth() + 1;// Adding 1 because getMonth() returns zero-based index
   return currentDate.getFullYear()+''+''+m; 
 };
+
+
 
 
 
@@ -64,6 +70,8 @@ export const FirebaseProvider = (props) =>{
      
    };
 
+  
+
    const addNewBook = async(book_name,book_id) => {
     // const Collection = firestore.CollectionReference('groups');
     addDoc(collection(firestore, "books_"+customId), {
@@ -87,20 +95,73 @@ export const FirebaseProvider = (props) =>{
     // });
     const arrayOfClassObjects = [];
     const q = query(collection(firestore, "books_"+customId));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    const querySnapshot = await getDocs(q);
     
       querySnapshot.forEach((doc) => {
         
           const d =doc.data();
          
-         arrayOfClassObjects.push(new Book(d.bookname, d.bookid));
+         arrayOfClassObjects.push({'name':d.bookname, 'id':d.bookid});
       });
-      console.log(arrayOfClassObjects)
-    });
+      // console.log(arrayOfClassObjects)
+    
 //   
  return arrayOfClassObjects;
   }; 
   
+   const signInUser=(email,password)=>{
+    signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      // Signed in 
+      const user = userCredential.user;
+      // ...
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+    });
+  };
+  
+  
+  const getAuthentication=()=>{
+
+    return auth;
+   };
+
+   const signUpUser = (email,password,group,studentName,prnNumber) =>{
+    createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      // Signed up 
+      const user = userCredential.user;
+      
+      // ...
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      // ..
+    });
+  };
+
+  const signOutUser=()=>{
+
+    signOut(auth);
+  };
+
+  const [user,setUser] = useState(null);
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      setUser(user);
+      // User is signed in, see docs for a list of available properties
+      // https://firebase.google.com/docs/reference/js/auth.user
+      // const uid = user.uid;
+      // ...
+    } else {
+      setUser(null);
+      // User is signed out
+      // ...
+    }
+  });
 
     return <FirebaseContext.Provider 
     value={{
@@ -108,6 +169,11 @@ export const FirebaseProvider = (props) =>{
       addNewBook,
       getBooks,
       getFirestoreData,
+      signInUser,
+      signUpUser,
+      user,
+      signOutUser,
+      getAuthentication,
     }}>
         {props.children}
     </FirebaseContext.Provider>

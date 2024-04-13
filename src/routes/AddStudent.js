@@ -18,18 +18,18 @@ const AddStudent = () => {
   };
 
   const handleSubmit = async(e) => {
-    // e.preventDefault();
+    e.preventDefault();
     // // Logic for handling form submission
     // console.log(formData);
     // addDoc(collection(firestore,'students'),{
     //     studentName: formData.studentName,
     //     prnNumber: formData.prnNumber
     // });
-    // // Reset form fields after submission
-    // setFormData({
-    //   studentName: '',
-    //   prnNumber: ''
-    // });
+    // Reset form fields after submission
+    setFormData({
+      studentName: '',
+      prnNumber: ''
+    });
   };
 
   return (

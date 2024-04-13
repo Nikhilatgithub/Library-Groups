@@ -2,17 +2,19 @@ import React, { useState } from 'react';
 import './LoginPage.css';
 import { useNavigate } from 'react-router-dom';
 import { TextField } from '@mui/material';
+import { useFirebase } from '../../firebases/firebaseDB';
 
 const RegistrationForm = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    confirmPassword: '',
+    group: '',
     studentName: '', // Add student name field
     prnNumber: ''   // Add PRN number field
   });
   
   const navigate = useNavigate();
+  const firebase = useFirebase();
 
   const handleChange = (e) => {
     setFormData({
@@ -24,7 +26,8 @@ const RegistrationForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // You can perform form validation and submission logic here
-    navigate('/login');
+    // navigate('/login');
+    firebase.signUpUser(formData.email,formData.password,formData.group,formData.studentName,formData.prnNumber)
     console.log(formData);
   };
 
@@ -77,12 +80,12 @@ const RegistrationForm = () => {
           />
         </div>
         <div className="form-group">
-          <label>Confirm Password:</label>
+          <label>Group Number:</label>
           <TextField
             className="txtField"
-            type="password"
-            name="confirmPassword"
-            value={formData.confirmPassword}
+            type="text"
+            name="group"
+            value={formData.group}
             onChange={handleChange}
             required
           />

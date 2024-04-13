@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useState } from 'react';
 import { styled } from '@mui/material/styles';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -44,7 +45,7 @@ const getCurrentMonthID = () => {
   return currentDate.getFullYear()+''+''+m; 
 };
 
-
+let rows =[];
 // function refresh(){
 //   React.useEffect(() => {
 //       getData();
@@ -52,29 +53,38 @@ const getCurrentMonthID = () => {
 //     }, []);
 // }
 const customId = ''+getCurrentMonthID();
-const handleClick = () => {
- // getData();
-};
+
 export default function BookTable() {
     const firebase = useFirebase();
-    let rows =[];
+    const [count, setCount] = useState(0);
     
-    const getData = async() => {
-    
-     rows=[];
-
-    const querySnapshot = await getDocs(collection(firebase.getFirestoreData(), "books_"+customId));
-    querySnapshot.forEach((doc) => {
-      // doc.data() is never undefined for query doc snapshots
-      console.log(doc.id, " => ", doc.data());
-      const d =doc.data();
-      
-      rows.push(createData( d.bookname,  d.bookid));
-    });
-
-   console.log(rows);
-   console.log(rows[0].name);
+    // let rows = [];
+    const handleClick = () => {
+      setCount(count + 1); // Update state to trigger rerender
     };
+  
+    const getData = async() => {
+     
+      rows =  await firebase.getBooks();
+    // rows=[];
+    
+    //  books.forEach(Book => {
+    //   rows.push(createData(Book.name, Book.id));
+    //  });
+  //  await console.log("lenght"+rows.length);
+    for (let index = 0; index < rows.length; index++) {
+      const element = rows[index];
+      console.log(element.name);
+    }
+    // console.log(rows);
+    // console.log("lenght"+rows.length);
+    handleClick();
+    };
+
+    React.useEffect(() => {
+      getData();
+    }, []);
+
     // 
   return (
     <div>
@@ -94,7 +104,7 @@ export default function BookTable() {
           {rows.map((row) => (
             <StyledTableRow key={row.id}>
               <StyledTableCell component="th" scope="row">
-                {row.bookname}
+                {row.name}
               </StyledTableCell>
               <StyledTableCell align="right">{row.id}</StyledTableCell>
             

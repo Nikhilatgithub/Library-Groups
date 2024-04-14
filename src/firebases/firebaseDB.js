@@ -10,13 +10,13 @@ import Book from "./BookDAO"
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDSjH0svCSlTAuIjRG8itCDb3-o2SAvQAI",
-  authDomain: "library-group-iacsd.firebaseapp.com",
-  projectId: "library-group-iacsd",
-  storageBucket: "library-group-iacsd.appspot.com",
-  messagingSenderId: "548992600009",
-  appId: "1:548992600009:web:0bb72ec73bbf7bc2f10a18",
-  measurementId: "G-MSWW0JKNGH"
+  apiKey: "your configuration key",
+  authDomain: "your configuration key",
+  projectId: "your configuration key",
+  storageBucket: "your configuration key",
+  messagingSenderId: "your configuration key",
+  appId: "your configuration key",
+  measurementId: "your configuration key"
 };
 const FirebaseContext = createContext(null);
 export const useFirebase = () => useContext(FirebaseContext);

@@ -14,7 +14,7 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import { Link } from 'react-router-dom';
 import './NavbarStyles.css';
-const settings = ['Profile', 'Logout'];
+
 
 function NavbarCustom() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -94,6 +94,10 @@ function NavbarCustom() {
                 display: { xs: 'block', md: 'none' },
               }}
             >
+              <Button color="inherit" component={Link} to="/">Home</Button>
+             <Button color="inherit" component={Link} to="/about">About</Button>
+            <Button color="inherit" component={Link} to="/login">Login</Button>
+            <Button color="inherit" component={Link} to="/addrecord">Add Record</Button>
               {/* {pages.map((page) => (
                  <Button key={page} color="inherit" component={Link} to={`/${page.toLowerCase()}`}>
                  {page}
@@ -125,6 +129,7 @@ function NavbarCustom() {
              <Button color="inherit" component={Link} to="/">Home</Button>
              <Button color="inherit" component={Link} to="/about">About</Button>
             <Button color="inherit" component={Link} to="/login">Login</Button>
+            <Button color="inherit" component={Link} to="/addrecord">Add Record</Button>
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
@@ -149,11 +154,11 @@ function NavbarCustom() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
+             
+                <MenuItem  component={Link} to="/profile">
+                  <Typography textAlign="center">Profile</Typography>
                 </MenuItem>
-              ))}
+            
             </Menu>
           </Box>
         </Toolbar>

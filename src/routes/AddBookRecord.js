@@ -3,8 +3,11 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
+import { useFirebase } from '../firebases/firebaseDB';
 
 const AddBookRecordPage = () => {
+  const firebase = useFirebase();
+
   const [studentName, setStudentName] = useState('');
   const [prnNumber, setPrnNumber] = useState('');
   const [date, setDate] = useState(getTodayDate());
@@ -15,14 +18,12 @@ const AddBookRecordPage = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
     // Logic to handle form submission, e.g., add the book record to a database
-    console.log('Student Name:', studentName);
-    console.log('PRN Number:', prnNumber);
-    console.log('Date:', date);
-    console.log('Last Student:', lastStudent);
+
+    firebase.addNewRecord(studentName,prnNumber,date,bookName,bookId,lastStudent);
+
     // Reset form fields
     setStudentName('');
     setPrnNumber('');
-    setDate('');
     setLastStudent('');
   };
 

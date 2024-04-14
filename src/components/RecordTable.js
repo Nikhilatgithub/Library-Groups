@@ -7,6 +7,8 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import { useFirebase } from '../firebases/firebaseDB';
+import { Button } from '@mui/material';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -31,17 +33,29 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 function createData(name, calories, fat, carbs, protein) {
   return { name, calories, fat, carbs, protein };
 }
-
-const rows = [
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-  createData('Eclair', 262, 16.0, 24, 6.0),
-  createData('Cupcake', 305, 3.7, 67, 4.3),
-  createData('Gingerbread', 356, 16.0, 49, 3.9),
-];
+let rows = [];
 
 export default function RecordTables() {
+  const firebase = useFirebase();
+  const [count, setCount] = React.useState(0);
+  const handleClick = () => {
+    setCount(count + 1); // Update state to trigger rerender
+  };
+
+  const getData = async() => {
+    rows = await firebase.getBookRecord();
+    handleClick();
+  };
+
+  React.useEffect(() => {
+   rows = firebase.getBookRecord();
+  }, []);
+
   return (
+    <div>
+       <Button  onClick={getData} variant="contained" color="primary" >
+           Show Records
+          </Button>
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 700 }} aria-label="customized table">
         <TableHead>
@@ -51,24 +65,25 @@ export default function RecordTables() {
             <StyledTableCell align="right">Book Name</StyledTableCell>
             <StyledTableCell align="right">Book No.</StyledTableCell>
             <StyledTableCell align="right">Taken Date</StyledTableCell>
-            <StyledTableCell align="right">Return Date</StyledTableCell>
+            <StyledTableCell align="right">Last Student</StyledTableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {rows.map((row) => (
             <StyledTableRow key={row.name}>
               <StyledTableCell component="th" scope="row">
-                {row.name}
+                {row.studentName}
               </StyledTableCell>
-              <StyledTableCell align="right">{row.calories}</StyledTableCell>
-              <StyledTableCell align="right">{row.fat}</StyledTableCell>
-              <StyledTableCell align="right">{row.carbs}</StyledTableCell>
-              <StyledTableCell align="right">{row.protein}</StyledTableCell>
-              <StyledTableCell align="right">{row.protein}</StyledTableCell>
+              <StyledTableCell align="right">{row.prnNumber}</StyledTableCell>
+              <StyledTableCell align="right">{row.bookName}</StyledTableCell>
+              <StyledTableCell align="right">{row.bookId}</StyledTableCell>
+              <StyledTableCell align="right">{row.date}</StyledTableCell>
+              <StyledTableCell align="right">{row.lastStudent}</StyledTableCell>
             </StyledTableRow>
           ))}
         </TableBody>
       </Table>
     </TableContainer>
+    </div>
   );
 }

@@ -29,15 +29,19 @@ const LoginPage = () => {
     .then((userCredential) => {
       // Signed in 
       // const user = userCredential.user;
+      firebase.getGroupId(username);
      alert("Login succesfull");
-     navigate('/home');
+     navigate('/');
       // ...
     })
     .catch((error) => {
       alert("Failed to login");
+      firebase.user=null;
       const errorCode = error.code;
       const errorMessage = error.message;
+      console.error(errorMessage);
     });
+    console.log(firebase.user);
     // navigate('/home');
   };
 

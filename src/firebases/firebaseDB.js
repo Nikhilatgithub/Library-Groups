@@ -2,7 +2,7 @@
 import { initializeApp } from "firebase/app";
 import {  createContext, useContext, useState } from "react";
 import { getAuth ,signOut,onAuthStateChanged,signInWithEmailAndPassword, createUserWithEmailAndPassword} from "firebase/auth";
-import {  doc,setDoc, getFirestore,collection, query, addDoc, getDocs } from "firebase/firestore";
+import {  doc,setDoc, getFirestore,collection, query, addDoc, getDocs, getDoc } from "firebase/firestore";
 import Book from "./BookDAO"
 
 // import { getAnalytics } from "firebase/analytics";
@@ -37,7 +37,7 @@ const getFirestoreData=()=>
 };
 
 const auth = getAuth(app);
-const grpId = 0;
+let grpId = 0;
 
 const getCurrentMonthID = () => {
   const currentDate = new Date();
@@ -55,7 +55,8 @@ const getCurrentYear = () => {
 export const FirebaseProvider = (props) =>{
   const customId = ''+getCurrentMonthID();
   const year = getCurrentYear();
-  const addNewGroup = async(groupId,numStudents) => {
+  
+  const addNewGroup = async(groupId) => {
     // const Collection = firestore.CollectionReference('groups');
     //  const customId = ''+getCurrentMonthID();
    
@@ -66,27 +67,86 @@ export const FirebaseProvider = (props) =>{
    //    numberOfStudents: numStudents
    
    // })
-   await setDoc(doc(firestore, "groups", customId+groupId), {
+   await setDoc(doc(firestore, "groups", groupId), {
      groupId: groupId,
-     numberOfStudents: numStudents
    }).then(function() {
     alert('Group Created');
   });
      
    };
 
-   const addNewStudent = async(group,studentName,prnNumber) => {
+   const addNewStudent = async(group,studentName,prnNumber,email) => {
     // const Collection = firestore.CollectionReference('groups');
-    addDoc(collection(firestore, "students_"+year), {
+    // addDoc(collection(firestore, "students_"+year,email), {
+    await setDoc(doc(firestore, "students_"+year, email), {
      'groupid': group,
      'name': studentName,
      'prnNumber': prnNumber,
    }).then(function() {
     alert('Student Added');
-  });
-   
-     
+    addNewGroup(group);
+  }); 
    };
+
+   const getStudentData = async (email)=>{
+    const docRef = doc(firestore, "students_"+year, email);
+    const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    console.log("Document data:", docSnap.data());
+    return docSnap.data();
+  } else {
+    console.log("No such document!");
+    return null;
+  }
+   };
+
+   const getBookRecord = async()=>{
+    try {
+      const subcollectionData = [];
+      console.log(grpId);
+      const querySnapshot = await getDocs(collection(firestore, "groups", grpId, "records"));
+    querySnapshot.forEach((doc) => {
+  // doc.data() is never undefined for query doc snapshots
+     console.log(doc.id, " => ", doc.data());
+     subcollectionData.push({
+        studentName: doc.data().studentName,
+        prnNumber: doc.data().prnNumber,
+        date: doc.data().date,
+        bookName: doc.data().bookName,
+        bookId: doc.data().bookId,
+        lastStudent: doc.data().lastStudent
+    });
+    });
+
+      return subcollectionData;
+    } catch (error) {
+      console.error("Error getting subcollection data:", error);
+      return [];
+    }
+   };
+
+const addNewRecord = async(studentName,prnNumber,date,bookName,bookId,lastStudent) => {
+    // const Collection = firestore.CollectionReference('groups');
+    try {
+      console.log(grpId);
+      const parentDocumentRef = doc(firestore, "groups", grpId);
+      const subcollectionRef = collection(parentDocumentRef,"records");
+      await addDoc(subcollectionRef, {
+        studentName: studentName,
+        prnNumber: prnNumber,
+        date: date,
+        bookName: bookName,
+        bookId: bookId,
+        lastStudent: lastStudent
+     });
+      console.log("Subdocument added successfully!");
+    } catch (error) {
+      console.error("Error adding subdocument:", error);
+    }
+   
+   
+   };
+
 
    const addNewBook = async(book_name,book_id) => {
     // const Collection = firestore.CollectionReference('groups');
@@ -98,25 +158,24 @@ export const FirebaseProvider = (props) =>{
     alert('Book Added');
   });
    
-     
+    
    };
 
-   const getGroupId = async() => {
-  
-    let gid = 0;
-    const q = query(collection(firestore, "students_"+year));
-    const querySnapshot = await getDocs(q);
+   const getGroupId = async(email) => { //call in login to get students group id;
+   
+    const docRef = doc(firestore, "students_"+year, email);
+    const docSnap = await getDoc(docRef);
     
-      querySnapshot.forEach((doc) => {
-        
-          const d =doc.data();
-         
-         arrayOfClassObjects.push({'name':d.bookname, 'id':d.bookid});
-      });
-      // console.log(arrayOfClassObjects)
+    if (docSnap.exists()) {
+      console.log("Grooupid:", docSnap.data().groupid);
+      grpId=docSnap.data().groupid;
+    } else {
+      // docSnap.data() will be undefined in this case
+      console.log("No such document!");
+    }
     
 //   
- return gid;
+
   }; 
   
   const getBooks = async() => {
@@ -149,6 +208,7 @@ export const FirebaseProvider = (props) =>{
     .then((userCredential) => {
       // Signed in 
       const user = userCredential.user;
+       getGroupId(email);
       // ...
     })
     .catch((error) => {
@@ -173,7 +233,7 @@ export const FirebaseProvider = (props) =>{
          alert("Not Register!!");
       }
       else{
-        addNewStudent(group,studentName,prnNumber);
+        addNewStudent(group,studentName,prnNumber,email);
       }
       
 
@@ -193,9 +253,14 @@ export const FirebaseProvider = (props) =>{
   };
 
   const [user,setUser] = useState(null);
+
   onAuthStateChanged(auth, (user) => {
     if (user) {
       setUser(user);
+      console.log(user.email);
+      getGroupId(user.email);
+      
+    // setStudent(data);
       // User is signed in, see docs for a list of available properties
       // https://firebase.google.com/docs/reference/js/auth.user
       // const uid = user.uid;
@@ -215,9 +280,12 @@ export const FirebaseProvider = (props) =>{
       getFirestoreData,
       signInUser,
       signUpUser,
-      user,
+      user,     
       signOutUser,
       getAuthentication,
+      getGroupId,
+      addNewRecord,
+      getBookRecord,
     }}>
         {props.children}
     </FirebaseContext.Provider>

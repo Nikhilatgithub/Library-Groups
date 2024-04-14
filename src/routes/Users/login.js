@@ -30,6 +30,7 @@ const LoginPage = () => {
       // Signed in 
       // const user = userCredential.user;
      alert("Login succesfull");
+     navigate('/home');
       // ...
     })
     .catch((error) => {
@@ -37,7 +38,7 @@ const LoginPage = () => {
       const errorCode = error.code;
       const errorMessage = error.message;
     });
-    navigate('/home');
+    // navigate('/home');
   };
 
   const handlelogout = (event) => {

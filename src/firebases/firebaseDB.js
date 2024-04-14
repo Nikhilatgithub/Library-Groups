@@ -37,6 +37,7 @@ const getFirestoreData=()=>
 };
 
 const auth = getAuth(app);
+const grpId = 0;
 
 const getCurrentMonthID = () => {
   const currentDate = new Date();
@@ -45,11 +46,15 @@ const getCurrentMonthID = () => {
 };
 
 
-
+const getCurrentYear = () => {
+  const currentDate = new Date();
+  return currentDate.getFullYear(); 
+};
 
 
 export const FirebaseProvider = (props) =>{
   const customId = ''+getCurrentMonthID();
+  const year = getCurrentYear();
   const addNewGroup = async(groupId,numStudents) => {
     // const Collection = firestore.CollectionReference('groups');
     //  const customId = ''+getCurrentMonthID();
@@ -70,19 +75,49 @@ export const FirebaseProvider = (props) =>{
      
    };
 
-  
+   const addNewStudent = async(group,studentName,prnNumber) => {
+    // const Collection = firestore.CollectionReference('groups');
+    addDoc(collection(firestore, "students_"+year), {
+     'groupid': group,
+     'name': studentName,
+     'prnNumber': prnNumber,
+   }).then(function() {
+    alert('Student Added');
+  });
+   
+     
+   };
 
    const addNewBook = async(book_name,book_id) => {
     // const Collection = firestore.CollectionReference('groups');
     addDoc(collection(firestore, "books_"+customId), {
       bookname: book_name,
-     bookid: book_id
+     bookid: book_id,
+     assign: false
    }).then(function() {
     alert('Book Added');
   });
    
      
    };
+
+   const getGroupId = async() => {
+  
+    let gid = 0;
+    const q = query(collection(firestore, "students_"+year));
+    const querySnapshot = await getDocs(q);
+    
+      querySnapshot.forEach((doc) => {
+        
+          const d =doc.data();
+         
+         arrayOfClassObjects.push({'name':d.bookname, 'id':d.bookid});
+      });
+      // console.log(arrayOfClassObjects)
+    
+//   
+ return gid;
+  }; 
   
   const getBooks = async() => {
   
@@ -133,12 +168,21 @@ export const FirebaseProvider = (props) =>{
     .then((userCredential) => {
       // Signed up 
       const user = userCredential.user;
+      if(user===null)
+      {
+         alert("Not Register!!");
+      }
+      else{
+        addNewStudent(group,studentName,prnNumber);
+      }
       
+
       // ...
     })
     .catch((error) => {
       const errorCode = error.code;
       const errorMessage = error.message;
+      alert(errorMessage);
       // ..
     });
   };

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { TextField, Button } from '@mui/material';
 import StudentTables from '../components/StudentTable';
-
+import { useFirebase } from '../firebases/firebaseDB';
+import './Users/LoginPage.css';
 
 
 const AddStudent = () => {
+  const firebase = useFirebase();
   const [formData, setFormData] = useState({
     studentName: '',
     prnNumber: ''
@@ -17,6 +19,8 @@ const AddStudent = () => {
     });
   };
 
+ 
+
   const handleSubmit = async(e) => {
     e.preventDefault();
     // // Logic for handling form submission
@@ -26,6 +30,7 @@ const AddStudent = () => {
     //     prnNumber: formData.prnNumber
     // });
     // Reset form fields after submission
+   await firebase.addNewStudentToGroup(formData.studentName,formData.prnNumber);
     setFormData({
       studentName: '',
       prnNumber: ''
@@ -33,7 +38,7 @@ const AddStudent = () => {
   };
 
   return (
-    <div className="add-student-container">
+    <div className="login-container">
       <h2>Add Student</h2>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
@@ -64,6 +69,7 @@ const AddStudent = () => {
           </Button>
         </div>
       </form>
+      
       <StudentTables />
     </div>
   );

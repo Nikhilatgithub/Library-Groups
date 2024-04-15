@@ -5,6 +5,7 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import BookTable from '../components/BookTable';
 import { useFirebase } from '../firebases/firebaseDB';
+import './Users/LoginPage.css';
 
 const AddBookPage = () => {
   const [bookName, setBookName] = useState('');
@@ -25,7 +26,7 @@ const AddBookPage = () => {
   };
 
   return (
-    <div>
+    <div className="login-container">
     <Paper elevation={3} sx={{ padding: 2, maxWidth: 400, margin: 'auto', marginBottom: 10}}>
       <Typography variant="h4" align="center" gutterBottom>
         Add New Book

@@ -102,11 +102,11 @@ export default function BookTable() {
         </TableHead>
         <TableBody>
           {rows.map((row) => (
-            <StyledTableRow key={row.id}>
+            <StyledTableRow key={row.bookId}>
               <StyledTableCell component="th" scope="row">
-                {row.name}
+                {row.bookName}
               </StyledTableCell>
-              <StyledTableCell align="right">{row.id}</StyledTableCell>
+              <StyledTableCell align="right">{row.bookId}</StyledTableCell>
             
             </StyledTableRow>
           ))}

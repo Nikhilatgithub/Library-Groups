@@ -2,7 +2,7 @@
 import { initializeApp } from "firebase/app";
 import {  createContext, useContext, useState } from "react";
 import { getAuth ,signOut,onAuthStateChanged,signInWithEmailAndPassword, createUserWithEmailAndPassword} from "firebase/auth";
-import {  doc,setDoc, getFirestore,collection, query, addDoc, getDocs, getDoc } from "firebase/firestore";
+import {  doc,setDoc, getFirestore,collection, query, addDoc, getDocs, getDoc, updateDoc } from "firebase/firestore";
 import Book from "./BookDAO"
 
 // import { getAnalytics } from "firebase/analytics";
@@ -30,14 +30,17 @@ export const app = initializeApp(firebaseConfig);
 
 
 
-const firestore = getFirestore(app);
+const firestore = getFirestore(app);   //returns the firestore instance
 const getFirestoreData=()=>
 {
  return firestore;
 };
 
+
+//firebase authentication code;
 const auth = getAuth(app);
-let grpId = 0;
+let grpId = 0;//group id of login student;
+
 
 const getCurrentMonthID = () => {
   const currentDate = new Date();
@@ -88,14 +91,14 @@ export const FirebaseProvider = (props) =>{
   }); 
    };
 
-   const getStudentData = async (email)=>{
-    const docRef = doc(firestore, "students_"+year, email);
+   const getStudentData = async ()=>{
+    const docRef = doc(firestore, "students_"+year, user.email);
     const docSnap = await getDoc(docRef);
   if (docSnap.exists()) {
-    console.log("Document data:", docSnap.data());
+   // console.log("Document data:", docSnap.data());
     return docSnap.data();
   } else {
-    console.log("No such document!");
+    alert("No such document!");
     return null;
   }
    };
@@ -120,7 +123,7 @@ export const FirebaseProvider = (props) =>{
 
       return subcollectionData;
     } catch (error) {
-      console.error("Error getting subcollection data:", error);
+      alert("Error getting subcollection data:", error);
       return [];
     }
    };
@@ -139,9 +142,50 @@ const addNewRecord = async(studentName,prnNumber,date,bookName,bookId,lastStuden
         bookId: bookId,
         lastStudent: lastStudent
      });
-      console.log("Subdocument added successfully!");
+     alert("New Record added successfully!");
     } catch (error) {
-      console.error("Error adding subdocument:", error);
+      alert("Error adding subdocument:", error);
+    }
+   
+   
+   };
+
+   const getStudentToGroupRecord = async()=>{
+    try {
+      const subcollectionData = [];
+      console.log(grpId);
+      const querySnapshot = await getDocs(collection(firestore, "groups", grpId, "student"));
+    querySnapshot.forEach((doc) => {
+  // doc.data() is never undefined for query doc snapshots
+     console.log(doc.id, " => ", doc.data());
+     subcollectionData.push({
+        studentName: doc.data().studentName,
+        prnNumber: doc.data().prnNumber
+    });
+    });
+
+      return subcollectionData;
+    } catch (error) {
+      alert("Error getting subcollection data:", error);
+      return [];
+    }
+   };
+
+   const addNewStudentToGroup = async(studentName,prnNumber) => {
+    // const Collection = firestore.CollectionReference('groups');
+    try {
+      console.log(grpId);
+      const parentDocumentRef = doc(firestore, "groups", grpId);
+     
+      const subcollectionRef = collection(parentDocumentRef,"student");
+      // await addDoc(subcollectionRef, {
+        setDoc(doc(subcollectionRef,prnNumber),{
+        studentName: studentName,
+        prnNumber: prnNumber,
+     });
+     alert("student to group added successfully!");
+    } catch (error) {
+      alert("Error adding subdocument:", error);
     }
    
    
@@ -149,15 +193,20 @@ const addNewRecord = async(studentName,prnNumber,date,bookName,bookId,lastStuden
 
 
    const addNewBook = async(book_name,book_id) => {
-    // const Collection = firestore.CollectionReference('groups');
-    addDoc(collection(firestore, "books_"+customId), {
-      bookname: book_name,
-     bookid: book_id,
-     assign: false
-   }).then(function() {
-    alert('Book Added');
-  });
    
+      try {
+      const parentDocumentRef = doc(firestore, "groups", grpId);
+      const subcollectionRef = collection(parentDocumentRef,"books");
+      // await addDoc(subcollectionRef, {
+        setDoc(doc(subcollectionRef,book_id),{
+        bookname: book_name,
+        bookid: book_id,
+        assign: false
+    });
+      console.log("Book added successfully!");
+    } catch (error) {
+      console.error("Error adding subdocument:", error);
+    }
     
    };
 
@@ -180,28 +229,68 @@ const addNewRecord = async(studentName,prnNumber,date,bookName,bookId,lastStuden
   
   const getBooks = async() => {
   
-    // const q = query(collection(firestore, "books_"+customId));
+    try {
+      const subcollectionData = [];
+      console.log(grpId);
+      const querySnapshot = await getDocs(collection(firestore, "groups", grpId, "books"));
+    querySnapshot.forEach((doc) => {
+  // doc.data() is never undefined for query doc snapshots
+     console.log(doc.id, " => ", doc.data());
+     subcollectionData.push({
+        bookName: doc.data().bookname,
+        bookId: doc.data().bookid,
+        assign: doc.data().assign
+    });
+    });
 
-    // const querySnapshot = await getDocs(q);
-    // querySnapshot.forEach((doc) => {
-    //   // doc.data() is never undefined for query doc snapshots
-    //   console.log(doc.id, " => ", doc.data());
-    // });
-    const arrayOfClassObjects = [];
-    const q = query(collection(firestore, "books_"+customId));
-    const querySnapshot = await getDocs(q);
-    
-      querySnapshot.forEach((doc) => {
-        
-          const d =doc.data();
-         
-         arrayOfClassObjects.push({'name':d.bookname, 'id':d.bookid});
-      });
-      // console.log(arrayOfClassObjects)
-    
-//   
- return arrayOfClassObjects;
+      return subcollectionData;
+    } catch (error) {
+      console.error("Error getting subcollection data:", error);
+      return [];
+    }
   }; 
+
+  const getNotAssignBooks = async() => {
+  
+    try {
+      const subcollectionData = [];
+      console.log(grpId);
+      const querySnapshot = await getDocs(collection(firestore, "groups", grpId, "books"));
+    querySnapshot.forEach((doc) => {
+  // doc.data() is never undefined for query doc snapshots
+     console.log(doc.id, " => ", doc.data());
+     if (!doc.data().assign) {
+      // Add data to subcollectionData only if assign is true
+      subcollectionData.push({
+          bookName: doc.data().bookname,
+          bookId: doc.data().bookid,
+          assign: doc.data().assign
+      });
+     }
+    });
+
+      return subcollectionData;
+    } catch (error) {
+      console.error("Error getting subcollection data:", error);
+      return [];
+    }
+  }; 
+
+  const updateBookAssignStatus = async (bookId) => {
+    try {
+        // Reference to the specific book document
+        const bookRef = doc(firestore, "groups", grpId, "books", bookId);
+        
+        // Update the assign property to true
+        await updateDoc(bookRef, {
+            assign: true
+        });
+
+        console.log("Book assign status updated successfully.");
+    } catch (error) {
+        console.error("Error updating book assign status:", error);
+    }
+};
   
    const signInUser=(email,password)=>{
     signInWithEmailAndPassword(auth, email, password)
@@ -286,6 +375,11 @@ const addNewRecord = async(studentName,prnNumber,date,bookName,bookId,lastStuden
       getGroupId,
       addNewRecord,
       getBookRecord,
+      getStudentData,
+      getStudentToGroupRecord,
+      addNewStudentToGroup,
+      getNotAssignBooks,
+      updateBookAssignStatus,
     }}>
         {props.children}
     </FirebaseContext.Provider>

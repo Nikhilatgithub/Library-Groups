@@ -9,6 +9,8 @@ import {BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import NavbarCustom from './components/Navbar';
 import AddBookRecordPage from './routes/AddBookRecord';
 import ProfilePage from './routes/Users/ProfilePage';
+import AddStudent from './routes/AddStudent';
+import AddBookPage from './routes/AddBooks';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
@@ -23,6 +25,8 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/addrecord" element={<AddBookRecordPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/addBooks" element={<AddBookPage />} />
+        <Route path="/addStudent" element={<AddStudent />} />
       </Routes>
     </Router>
       

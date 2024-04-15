@@ -9,7 +9,19 @@ import { Container, Typography, Paper, Avatar } from '@mui/material';
 const ProfilePage = () => {
     const firebase = useFirebase(); // Custom hook to get the current user
   const [userProfile, setUserProfile] = useState(null);
-  
+  const [user, setUser] = useState({
+    group: '',
+    studentName: '', // Add student name field
+    prnNumber: ''   // Add PRN number field
+  });
+  const userData = async()=>{
+   
+    const data= await firebase.getStudentData();
+    setUser({prnNumber:data.prnNumber,
+    studentName:data.name,
+    group:data.groupid});
+    console.log(data);
+  };
 
   useEffect(() => {
     // Fetch additional user information from Firestore or other sources if needed
@@ -27,6 +39,7 @@ const ProfilePage = () => {
      
     // For simplicity, we'll just display the basic user information from authentication
     setUserProfile(firebase.user);
+    userData();
   }, []);
 
   return (
@@ -36,6 +49,15 @@ const ProfilePage = () => {
           <Avatar src="/path/to/avatar.jpg" style={{ width: '96px', height: '96px', marginBottom: '16px', margin: 'auto' }} />
           <Typography variant="h5" align="center" gutterBottom>
           {userProfile?.displayName}
+        </Typography>
+        <Typography variant="body1" align="center" gutterBottom>
+          Name: {user.studentName}
+        </Typography>
+        <Typography variant="body1" align="center" gutterBottom>
+          Prn Number: { user.prnNumber}
+        </Typography>
+        <Typography variant="body1" align="center" gutterBottom>
+          Group Id: {user.group}
         </Typography>
         <Typography variant="body1" align="center" gutterBottom>
           Email: {userProfile?.email}

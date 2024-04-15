@@ -7,6 +7,9 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import { Button } from '@mui/material';
+import { useFirebase } from '../firebases/firebaseDB';
+
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -32,16 +35,38 @@ function createData(name, prn) {
   return { name, prn};
 }
 
-const rows = [
-  createData('Nikhil', 159),
-  createData('Bhushan', 237 ),
-  createData('Vedant', 262),
-  createData('Sihhi', 305 ),
-  createData('Aditya', 356),
-];
+let rows = [];
 
 export default function StudentTables() {
+  const firebase = useFirebase();
+  const [count, setCount] = React.useState(0);
+    
+    // let rows = [];
+    const handleClick = () => {
+      setCount(count + 1); // Update state to trigger rerender
+    };
+  
+    const getData = async() => {
+     
+      rows =  await firebase.getStudentToGroupRecord();
+  
+    for (let index = 0; index < rows.length; index++) {
+      const element = rows[index];
+      console.log(element.name);
+    }
+   
+     handleClick();
+    };
+
+    React.useEffect(() => {
+      getData();
+    }, []);
+
   return (
+    <div>
+    <Button  onClick={getData} variant="contained" color="primary" >
+         Show Students
+        </Button>
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 700 }} aria-label="customized table">
         <TableHead>
@@ -53,16 +78,17 @@ export default function StudentTables() {
         </TableHead>
         <TableBody>
           {rows.map((row) => (
-            <StyledTableRow key={row.name}>
+            <StyledTableRow key={row.studentName}>
               <StyledTableCell component="th" scope="row">
-                {row.name}
+                {row.studentName}
               </StyledTableCell>
-              <StyledTableCell align="right">{row.prn}</StyledTableCell>
+              <StyledTableCell align="right">{row.prnNumber}</StyledTableCell>
             
             </StyledTableRow>
           ))}
         </TableBody>
       </Table>
     </TableContainer>
+    </div>
   );
 }

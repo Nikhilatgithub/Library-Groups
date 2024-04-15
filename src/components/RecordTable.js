@@ -48,7 +48,7 @@ export default function RecordTables() {
   };
 
   React.useEffect(() => {
-   rows = firebase.getBookRecord();
+    getData();
   }, []);
 
   return (

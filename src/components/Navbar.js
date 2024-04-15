@@ -158,6 +158,12 @@ function NavbarCustom() {
                 <MenuItem  component={Link} to="/profile">
                   <Typography textAlign="center">Profile</Typography>
                 </MenuItem>
+                <MenuItem  component={Link} to="/addBooks">
+                  <Typography textAlign="center">Add Books</Typography>
+                </MenuItem>
+                <MenuItem  component={Link} to="/addStudent">
+                  <Typography textAlign="center">Add Student</Typography>
+                </MenuItem>
             
             </Menu>
           </Box>

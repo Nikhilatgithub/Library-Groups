@@ -92,7 +92,7 @@ export default function BookTable() {
            Show Books
           </Button>
     <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 700 }} aria-label="customized table">
+      <Table sx={{ minWidth: 500 }} aria-label="customized table">
         <TableHead>
           <TableRow>
             <StyledTableCell>Book Name</StyledTableCell>

@@ -5,7 +5,8 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import { useFirebase } from '../firebases/firebaseDB';
 import Select from '@mui/material/Select';
-import { InputLabel, MenuItem, OutlinedInput } from '@mui/material';
+import { Box, CircularProgress, InputLabel, MenuItem, OutlinedInput } from '@mui/material';
+import MediaCard from '../components/HomeCard';
 
 
 let names = [];
@@ -21,15 +22,16 @@ const AddBookRecordPage = () => {
   const [lastStudent, setLastStudent] = useState('');
   const [bookName, setBookName] = useState('');
   const [bookId, setBookId] = useState('');
-
+  const [progressD, setProgressD] = useState(false);
   const [books, setBooks] = useState([]);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async(event) => {
+    
     event.preventDefault();
     // Logic to handle form submission, e.g., add the book record to a database
-
-    firebase.addNewRecord(studentName,prnNumber,date,bookName,bookId,lastStudent);
-    firebase.updateBookAssignStatus(selectedBookId);
+    setProgressD(true);
+    await firebase.addNewRecord(studentName,prnNumber,date,bookName,bookId,lastStudent);
+    await firebase.updateBookAssignStatus(selectedBookId);
     // Reset form fields
     setStudentName('');
     setPrnNumber('');
@@ -38,6 +40,7 @@ const AddBookRecordPage = () => {
     setBookId('');
     getBookData();
     getData();
+    setProgressD(false);
   };
   
 
@@ -82,9 +85,12 @@ const AddBookRecordPage = () => {
   };
 
   React.useEffect(() => {
-   getData();
-   getBookData();
-   handleClick();
+    if(firebase.user!==null)
+    {
+    getData();
+    getBookData();
+    handleClick();
+    }
   }, []);
 
   const handleDateChange = (event) => {
@@ -127,6 +133,18 @@ const AddBookRecordPage = () => {
   
   };
 
+  if(firebase.user===null)
+  {
+    return (
+    
+    
+      <div className='card' >
+     <MediaCard />
+        </div>
+      
+    );
+  }
+  else{
 
   return (
     <Paper elevation={3} sx={{ padding: 2, maxWidth: 400, margin: 'auto' }}>
@@ -145,7 +163,7 @@ const AddBookRecordPage = () => {
           />
         </div> */}
         <div fullWidth>
-         <InputLabel id="demo-multiple-name-label">Name</InputLabel>
+         <InputLabel id="demo-multiple-name-label">Select Name</InputLabel>
         <Select
           labelId="demo-multiple-name-label"
           id="demo-multiple-name"
@@ -196,6 +214,7 @@ const AddBookRecordPage = () => {
             fullWidth
             margin="normal"
           /> */}
+          <InputLabel id="demo-multiple-book-label">Select Book</InputLabel>
           <Select
           labelId="demo-multiple-book-label"
           id="demo-multiplebokk"
@@ -255,6 +274,10 @@ const AddBookRecordPage = () => {
           ))}
         </Select>
         </div>
+        {progressD ? (<div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
+          <Box sx={{ display: 'center' , alignItems: 'center' }}>
+            <CircularProgress />
+          </Box></div>) : (<div></div>)}
 
         <div style={{ textAlign: 'center', marginTop: 20 }}>
           <Button type="submit" variant="contained" color="primary">
@@ -264,6 +287,7 @@ const AddBookRecordPage = () => {
       </form>
     </Paper>
   );
+  }
 };
 
 export default AddBookRecordPage;

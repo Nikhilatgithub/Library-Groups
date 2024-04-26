@@ -128,7 +128,8 @@ function NavbarCustom() {
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
              <Button color="inherit" component={Link} to="/">Home</Button>
              <Button color="inherit" component={Link} to="/about">About</Button>
-            <Button color="inherit" component={Link} to="/login">Login</Button>
+            <Button color="inherit" component={Link} to="/addBooks">Add Books</Button>
+            <Button color="inherit" component={Link} to="/addStudent">Add Student</Button>
             <Button color="inherit" component={Link} to="/addrecord">Add Record</Button>
           </Box>
 
@@ -158,12 +159,16 @@ function NavbarCustom() {
                 <MenuItem  component={Link} to="/profile">
                   <Typography textAlign="center">Profile</Typography>
                 </MenuItem>
-                <MenuItem  component={Link} to="/addBooks">
+                {/* <MenuItem  component={Link} to="/addBooks">
                   <Typography textAlign="center">Add Books</Typography>
                 </MenuItem>
                 <MenuItem  component={Link} to="/addStudent">
                   <Typography textAlign="center">Add Student</Typography>
+                </MenuItem> */}
+                <MenuItem  component={Link} to="/login">
+                  <Typography textAlign="center">Login</Typography>
                 </MenuItem>
+                
             
             </Menu>
           </Box>

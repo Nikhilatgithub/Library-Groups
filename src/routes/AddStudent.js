@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { TextField, Button } from '@mui/material';
+import { TextField, Button, CircularProgress, Box, Paper } from '@mui/material';
 import StudentTables from '../components/StudentTable';
 import { useFirebase } from '../firebases/firebaseDB';
 import './Users/LoginPage.css';
+import MediaCard from '../components/HomeCard';
 
 
 const AddStudent = () => {
   const firebase = useFirebase();
+  const [progressD, setProgressD] = useState(false);
   const [formData, setFormData] = useState({
     studentName: '',
     prnNumber: ''
@@ -22,6 +24,7 @@ const AddStudent = () => {
  
 
   const handleSubmit = async(e) => {
+    setProgressD(true);
     e.preventDefault();
     // // Logic for handling form submission
     // console.log(formData);
@@ -35,11 +38,31 @@ const AddStudent = () => {
       studentName: '',
       prnNumber: ''
     });
+    setProgressD(false);
   };
 
+  if(firebase.user===null)
+  {
+    return (
+    
+    
+      <div className='card' >
+     <MediaCard />
+        </div>
+      
+    );
+  }
+  else{
+
   return (
-    <div className="login-container">
+    <div className="containerTwoColumn">
+      <Paper elevation={3} sx={{ padding: 2, maxWidth: 500,marginLeft:5,
+     marginBottom: 10,marginTop:2}}>
       <h2>Add Student</h2>
+      {progressD ? (<div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
+          <Box sx={{ display: 'center' , alignItems: 'center' }}>
+            <CircularProgress />
+          </Box></div>) : (<div></div>)}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <TextField
@@ -69,10 +92,15 @@ const AddStudent = () => {
           </Button>
         </div>
       </form>
-      
+      </Paper>
+      <Paper elevation={3} sx={{ padding: 2, maxWidth: 500,
+     marginBottom: 10,marginTop:2}}>
+     
       <StudentTables />
+      </Paper>
     </div>
   );
+  }
 };
 
 export default AddStudent;

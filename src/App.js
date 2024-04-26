@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import './App.css';
 import RegistrationForm from './routes/Users/Register';
 import LoginPage from './routes/Users/login';
@@ -11,9 +11,29 @@ import AddBookRecordPage from './routes/AddBookRecord';
 import ProfilePage from './routes/Users/ProfilePage';
 import AddStudent from './routes/AddStudent';
 import AddBookPage from './routes/AddBooks';
+import { useFirebase } from './firebases/firebaseDB';
+import FileUploader from './routes/Users/ProfileImgUpload';
+
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const firebase = useFirebase();
+  useEffect(() => {
+    // Function to log out the user
+    const logoutUser = () => {
+      // Your logout logic here
+      firebase.signOutUser();
+      console.log('User logged out');
+    };
+
+    // Add event listener for when the component unmounts
+    window.addEventListener('beforeunload', logoutUser);
+
+    // Cleanup function to remove the event listener
+    return () => {
+      window.removeEventListener('beforeunload', logoutUser);
+    };
+  }, []); // 
+
   return (
     
     <Router className="bg-component">
@@ -27,10 +47,11 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/addBooks" element={<AddBookPage />} />
         <Route path="/addStudent" element={<AddStudent />} />
+        <Route path="/UserProfileImg" element={<FileUploader />} />
       </Routes>
     </Router>
       
-    
+      
   
   );
 }

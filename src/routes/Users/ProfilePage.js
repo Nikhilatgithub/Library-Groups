@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useFirebase } from '../../firebases/firebaseDB';
 import { Container, Typography, Paper, Avatar } from '@mui/material';
+import MediaCard from '../../components/HomeCard';
+import { useNavigate } from 'react-router-dom';
 
 
   // Assuming you have a custom hook for Firebase authentication
@@ -9,11 +11,13 @@ import { Container, Typography, Paper, Avatar } from '@mui/material';
 const ProfilePage = () => {
     const firebase = useFirebase(); // Custom hook to get the current user
   const [userProfile, setUserProfile] = useState(null);
+  const navigate = useNavigate();
   const [user, setUser] = useState({
     group: '',
     studentName: '', // Add student name field
     prnNumber: ''   // Add PRN number field
   });
+  
   const userData = async()=>{
    
     const data= await firebase.getStudentData();
@@ -21,6 +25,11 @@ const ProfilePage = () => {
     studentName:data.name,
     group:data.groupid});
     console.log(data);
+  };
+
+  const handleProfile = ()=>{
+   
+    navigate('/UserProfileImg');
   };
 
   useEffect(() => {
@@ -38,15 +47,33 @@ const ProfilePage = () => {
     // });
      
     // For simplicity, we'll just display the basic user information from authentication
+    if(firebase.user!==null)
+    {
     setUserProfile(firebase.user);
     userData();
+    }
   }, []);
+
+  if(firebase.user===null)
+  {
+    return (
+    
+    
+      <div className='card' >
+     <MediaCard />
+        </div>
+      
+    );
+  }
+  else{
 
   return (
     <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Paper style={{ padding: '16px', maxWidth: '600px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div onClick={handleProfile}>
           <Avatar src="/path/to/avatar.jpg" style={{ width: '96px', height: '96px', marginBottom: '16px', margin: 'auto' }} />
+          </div>
           <Typography variant="h5" align="center" gutterBottom>
           {userProfile?.displayName}
         </Typography>
@@ -68,6 +95,7 @@ const ProfilePage = () => {
     </div>
     
   );
+  }
 };
 
 export default ProfilePage;

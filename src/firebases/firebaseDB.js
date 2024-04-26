@@ -1,9 +1,10 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import {  createContext, useContext, useState } from "react";
-import { getAuth ,signOut,onAuthStateChanged,signInWithEmailAndPassword, createUserWithEmailAndPassword} from "firebase/auth";
+import { getAuth ,signOut,onAuthStateChanged,signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail} from "firebase/auth";
 import {  doc,setDoc, getFirestore,collection, query, addDoc, getDocs, getDoc, updateDoc } from "firebase/firestore";
 import Book from "./BookDAO"
+import { useNavigate } from "react-router-dom";
 
 // import { getAnalytics } from "firebase/analytics";
 // TODO: Add SDKs for Firebase products that you want to use
@@ -39,7 +40,8 @@ const getFirestoreData=()=>
 
 //firebase authentication code;
 const auth = getAuth(app);
-let grpId = 0;//group id of login student;
+//let grpId = 0;//group id of login student;
+
 
 
 const getCurrentMonthID = () => {
@@ -57,8 +59,11 @@ const getCurrentYear = () => {
 
 export const FirebaseProvider = (props) =>{
   const customId = ''+getCurrentMonthID();
+
+  const [grpId, setGrpId] = useState(0);
+
   const year = getCurrentYear();
-  
+ 
   const addNewGroup = async(groupId) => {
     // const Collection = firestore.CollectionReference('groups');
     //  const customId = ''+getCurrentMonthID();
@@ -106,21 +111,24 @@ export const FirebaseProvider = (props) =>{
    const getBookRecord = async()=>{
     try {
       const subcollectionData = [];
-      console.log(grpId);
-      const querySnapshot = await getDocs(collection(firestore, "groups", grpId, "records"));
-    querySnapshot.forEach((doc) => {
-  // doc.data() is never undefined for query doc snapshots
-     console.log(doc.id, " => ", doc.data());
-     subcollectionData.push({
-        studentName: doc.data().studentName,
-        prnNumber: doc.data().prnNumber,
-        date: doc.data().date,
-        bookName: doc.data().bookName,
-        bookId: doc.data().bookId,
-        lastStudent: doc.data().lastStudent
-    });
-    });
-
+      // console.log(grpId);
+      
+        const querySnapshot = await getDocs(collection(firestore, "groups", grpId, "records"));
+        querySnapshot.forEach((doc) => {
+      // doc.data() is never undefined for query doc snapshots
+         console.log(doc.id, " => ", doc.data());
+         subcollectionData.push({
+            studentName: doc.data().studentName,
+            prnNumber: doc.data().prnNumber,
+            date: doc.data().date,
+            bookName: doc.data().bookName,
+            bookId: doc.data().bookId,
+            lastStudent: doc.data().lastStudent
+        });
+        });
+    
+      
+     
       return subcollectionData;
     } catch (error) {
       alert("Error getting subcollection data:", error);
@@ -203,9 +211,9 @@ const addNewRecord = async(studentName,prnNumber,date,bookName,bookId,lastStuden
         bookid: book_id,
         assign: false
     });
-      console.log("Book added successfully!");
+      alert("Book added successfully!");
     } catch (error) {
-      console.error("Error adding subdocument:", error);
+      alert("Error adding subdocument:", error);
     }
     
    };
@@ -217,7 +225,8 @@ const addNewRecord = async(studentName,prnNumber,date,bookName,bookId,lastStuden
     
     if (docSnap.exists()) {
       console.log("Grooupid:", docSnap.data().groupid);
-      grpId=docSnap.data().groupid;
+      // grpId=docSnap.data().groupid;
+      setGrpId(docSnap.data().groupid);
     } else {
       // docSnap.data() will be undefined in this case
       console.log("No such document!");
@@ -323,10 +332,43 @@ const addNewRecord = async(studentName,prnNumber,date,bookName,bookId,lastStuden
       }
       else{
         addNewStudent(group,studentName,prnNumber,email);
+        addNewStudentToGroup(studentName,prnNumber);
+        const auth = getAuth();
+
+        //email verification link;
+        sendEmailVerification(auth.currentUser)
+        .then(() => {
+          alert("Email verification link send please verify");
+        });
       }
       
 
       // ...
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      alert(errorMessage);
+      // ..
+    });
+  };
+
+const sendEmailVerificationlink = () =>{
+  const auth = getAuth();
+
+  //email verification link;
+  sendEmailVerification(auth.currentUser)
+  .then(() => {
+    alert("Email verification link send please verify");
+  });
+};
+
+  const userPassReset=(email)=>{
+
+    sendPasswordResetEmail(auth, email)
+    .then(() => {
+      alert("Password reset email sent!");
+      // ..
     })
     .catch((error) => {
       const errorCode = error.code;
@@ -346,8 +388,9 @@ const addNewRecord = async(studentName,prnNumber,date,bookName,bookId,lastStuden
   onAuthStateChanged(auth, (user) => {
     if (user) {
       setUser(user);
-      console.log(user.email);
+      // console.log(user.email);
       getGroupId(user.email);
+      
       
     // setStudent(data);
       // User is signed in, see docs for a list of available properties
@@ -369,7 +412,8 @@ const addNewRecord = async(studentName,prnNumber,date,bookName,bookId,lastStuden
       getFirestoreData,
       signInUser,
       signUpUser,
-      user,     
+      user, 
+      grpId,    
       signOutUser,
       getAuthentication,
       getGroupId,
@@ -380,6 +424,8 @@ const addNewRecord = async(studentName,prnNumber,date,bookName,bookId,lastStuden
       addNewStudentToGroup,
       getNotAssignBooks,
       updateBookAssignStatus,
+      userPassReset,
+      sendEmailVerificationlink,
     }}>
         {props.children}
     </FirebaseContext.Provider>

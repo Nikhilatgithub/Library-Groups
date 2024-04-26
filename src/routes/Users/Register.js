@@ -23,12 +23,16 @@ const RegistrationForm = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
     // You can perform form validation and submission logic here
     // navigate('/login');
-    firebase.signUpUser(formData.email,formData.password,formData.group,formData.studentName,formData.prnNumber)
-    console.log(formData);
+    await firebase.signUpUser(formData.email,formData.password,formData.group,formData.studentName,formData.prnNumber)
+    //console.log(formData);
+    if (firebase.grpId>0)
+    {
+      navigate('/');
+    }
   };
 
   return (

@@ -50,10 +50,10 @@ export default function StudentTables() {
      
       rows =  await firebase.getStudentToGroupRecord();
   
-    for (let index = 0; index < rows.length; index++) {
-      const element = rows[index];
-      console.log(element.name);
-    }
+    // for (let index = 0; index < rows.length; index++) {
+    //   const element = rows[index];
+    //   console.log(element.name);
+    // }
    
      handleClick();
     };
@@ -68,7 +68,7 @@ export default function StudentTables() {
          Show Students
         </Button>
     <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 700 }} aria-label="customized table">
+      <Table sx={{ minWidth: 500 }} aria-label="customized table">
         <TableHead>
           <TableRow>
             <StyledTableCell>Student Name</StyledTableCell>

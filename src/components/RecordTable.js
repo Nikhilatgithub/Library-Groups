@@ -9,6 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { useFirebase } from '../firebases/firebaseDB';
 import { Button } from '@mui/material';
+import MediaCard from './HomeCard';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -33,31 +34,48 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 function createData(name, calories, fat, carbs, protein) {
   return { name, calories, fat, carbs, protein };
 }
-let rows = [];
+// let rows = [];
 
 export default function RecordTables() {
   const firebase = useFirebase();
   const [count, setCount] = React.useState(0);
+  const [rows, setRows] = React.useState([]);
+
   const handleClick = () => {
     setCount(count + 1); // Update state to trigger rerender
   };
 
   const getData = async() => {
-    rows = await firebase.getBookRecord();
     handleClick();
+    // rows = await firebase.getBookRecord();
+    await firebase.getBookRecord().then((newData) => {
+      setRows(newData); // Update the component state with the new data
+    })
+    .catch((error) => {
+      console.error('Error fetching data:', error);
+    });
+  
+ 
+   // handleClick();
   };
 
   React.useEffect(() => {
-    getData();
+   
+      if(firebase.grpId>0)
+    {
+      getData();
+    }
+    
   }, []);
-
-  return (
-    <div>
+ 
+    return (
+    <div style={{ height: '100%' ,
+      width: 'fit-content' }}>
        <Button  onClick={getData} variant="contained" color="primary" >
            Show Records
           </Button>
     <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 700 }} aria-label="customized table">
+      <Table sx={{ minWidth: 800 }} aria-label="customized table">
         <TableHead>
           <TableRow>
             <StyledTableCell>Student Name</StyledTableCell>
@@ -86,4 +104,5 @@ export default function RecordTables() {
     </TableContainer>
     </div>
   );
+  
 }

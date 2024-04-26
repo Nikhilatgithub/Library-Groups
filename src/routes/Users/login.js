@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './LoginPage.css';
-import { Button, TextField } from '@mui/material';
+import { AlertTitle, Box, Button, CircularProgress, TextField } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useFirebase } from '../../firebases/firebaseDB';
 import Alert from '@mui/material/Alert';
@@ -15,7 +15,7 @@ const email = value => (
 
 const LoginPage = () => {
   const firebase = useFirebase();
-
+  const [progressD, setProgressD] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -24,24 +24,28 @@ const LoginPage = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
     // Logic for handling form submission
+    setProgressD(true);
     const auth=firebase.getAuthentication();
     signInWithEmailAndPassword(auth, username, password)
     .then((userCredential) => {
       // Signed in 
       // const user = userCredential.user;
       firebase.getGroupId(username);
-     alert("Login succesfull");
+      setProgressD(false);
+    //  alert("Login succesfull");
      navigate('/');
       // ...
     })
     .catch((error) => {
-      alert("Failed to login");
+     
       firebase.user=null;
       const errorCode = error.code;
       const errorMessage = error.message;
       console.error(errorMessage);
+      alert("Failed to login "+errorMessage);
     });
     console.log(firebase.user);
+    setProgressD(false);
     // navigate('/home');
   };
 
@@ -51,6 +55,18 @@ const LoginPage = () => {
     firebase.signOutUser();
   };
 
+  const handleForgotPass =(event) =>{
+    event.preventDefault();
+    if(username.trim().length === 0)
+    {
+      
+    }
+    else
+    {
+      firebase.userPassReset(username);
+    }
+    
+  }
   const handleCreateNew = (event) => {
     event.preventDefault();
     // Logic for handling form submission
@@ -63,7 +79,7 @@ const LoginPage = () => {
   {
     return (
       <div className="login-container">
-         
+        
         <h2>Login</h2>
         {error && <p className="error">{error}</p>}
         <form onSubmit={handleSubmit}>
@@ -74,8 +90,15 @@ const LoginPage = () => {
               type="email"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              required
             />
           </div>
+          {progressD ? (<div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
+          <Box sx={{ display: 'center' , alignItems: 'center' }}>
+            <CircularProgress />
+          </Box></div>) : (<div></div>)}
+          
+          
           <div className="form-group">
             <label>Password</label>
             <TextField
@@ -86,7 +109,7 @@ const LoginPage = () => {
             />
           </div>
           <Button type="submit">Login</Button>
-          <Button size="small" color="secondary">Forgot Password</Button>
+          <Button size="small" color="secondary" onClick={handleForgotPass}>Forgot Password</Button>
           <Button size="small" color="secondary" onClick={handleCreateNew}>Create New Account</Button>
         </form>
       </div>

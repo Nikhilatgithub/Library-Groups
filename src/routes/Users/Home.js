@@ -8,6 +8,7 @@ import AddBookRecordPage from '../AddBookRecord';
 import CreateGroupForm from '../CreateGroup';
 import JoinGroupForm from '../JoinGroup';
 import AddStudent from '../AddStudent';
+import EmailVerification from './VerifyEmail';
 const HomePage = () => {
   const firebase = useFirebase();
   if(firebase.user===null)
@@ -27,7 +28,19 @@ const HomePage = () => {
       
     );
   }
+ else if (!firebase.user.emailVerified)
+ {
+  return (
+     
+    <div className='card' >
+   
+   <EmailVerification />
+      </div>
+    
+  );
+ }
   else{
+   
     return (
      
       <div className='card' >

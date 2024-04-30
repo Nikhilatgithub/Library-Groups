@@ -1,7 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import {  createContext, useContext, useState } from "react";
-import { getAuth ,signOut,onAuthStateChanged,signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail} from "firebase/auth";
+import { getDownloadURL, getStorage, ref , uploadBytes, uploadString} from "firebase/storage";
+import { getAuth ,signOut,onAuthStateChanged,signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, updateProfile} from "firebase/auth";
 import {  doc,setDoc, getFirestore,collection, query, addDoc, getDocs, getDoc, updateDoc } from "firebase/firestore";
 import Book from "./BookDAO"
 import { useNavigate } from "react-router-dom";
@@ -19,7 +20,8 @@ const firebaseConfig = {
   storageBucket: "library-group-iacsd.appspot.com",
   messagingSenderId: "548992600009",
   appId: "1:548992600009:web:0bb72ec73bbf7bc2f10a18",
-  measurementId: "G-MSWW0JKNGH"
+  measurementId: "G-MSWW0JKNGH",
+  // storageBucket: "gs://library-group-iacsd.appspot.com"
 };
 const FirebaseContext = createContext(null);
 export const useFirebase = () => useContext(FirebaseContext);
@@ -36,6 +38,10 @@ const getFirestoreData=()=>
 {
  return firestore;
 };
+
+//firestore storage code
+const storage = getStorage();
+
 
 
 //firebase authentication code;
@@ -59,8 +65,9 @@ const getCurrentYear = () => {
 
 export const FirebaseProvider = (props) =>{
   const customId = ''+getCurrentMonthID();
-
+  const [user,setUser] = useState(null);
   const [grpId, setGrpId] = useState(0);
+  let UserProfilePhoto="";
 
   const year = getCurrentYear();
  
@@ -82,6 +89,37 @@ export const FirebaseProvider = (props) =>{
   });
      
    };
+
+ //upload profile to firestore storage
+
+ const uploadProfile = async(file) => {
+  if(file!=null)
+  {
+    const storageRef = ref(storage, `library/img/profile/${user.email}.jpg`);
+    // const storageRef = ref(storage, `/files/${file.name}`);
+   
+          // progress can be paused and resumed. It also exposes progress updates.
+          // Receives the storage reference and the file to upload.
+          // const uploadTask = uploadBytesResumable(storageRef, file);
+          uploadBytes(storageRef, file).then((snapshot) => {
+      getDownloadURL(snapshot.ref).then((url) => {
+        console.log(url);
+        updateUserProfilePhoto(user.email,url);
+       
+        alert('Uploaded a profile photo!');
+    });
+      
+    });
+  }
+  else{
+    alert("No image selected");
+  }
+  
+ };
+
+
+
+
 
    const addNewStudent = async(group,studentName,prnNumber,email) => {
     // const Collection = firestore.CollectionReference('groups');
@@ -227,6 +265,7 @@ const addNewRecord = async(studentName,prnNumber,date,bookName,bookId,lastStuden
       console.log("Grooupid:", docSnap.data().groupid);
       // grpId=docSnap.data().groupid;
       setGrpId(docSnap.data().groupid);
+      
     } else {
       // docSnap.data() will be undefined in this case
       console.log("No such document!");
@@ -300,6 +339,44 @@ const addNewRecord = async(studentName,prnNumber,date,bookName,bookId,lastStuden
         console.error("Error updating book assign status:", error);
     }
 };
+
+//get user profile photo link
+
+const getUserProfilePhoto = async(email) => { //
+   
+  const docRef = doc(firestore, "students_"+year, email);
+  const docSnap = await getDoc(docRef);
+  
+  if (docSnap.exists()) {
+    console.log("photoLink:", docSnap.data().photoLink);
+    UserProfilePhoto=docSnap.data().photoLink;
+    // setUserProfilePhoto(docSnap.data().photoLink);
+  } else {
+
+    console.log("No such document!");
+  }
+  
+//   
+
+}; 
+
+//update user profile photo
+
+const updateUserProfilePhoto = async (email,link) => {
+  try {
+      // Reference to the specific book document
+      const photoRef = doc(firestore, "students_"+year, email);
+      
+      // Update the assign property to true
+      await updateDoc(photoRef, {
+          photoLink: link
+      });
+
+      console.log("Book assign status updated successfully.");
+  } catch (error) {
+      console.error("Error updating book assign status:", error);
+  }
+};
   
    const signInUser=(email,password)=>{
     signInWithEmailAndPassword(auth, email, password)
@@ -307,6 +384,7 @@ const addNewRecord = async(studentName,prnNumber,date,bookName,bookId,lastStuden
       // Signed in 
       const user = userCredential.user;
        getGroupId(email);
+       getUserProfilePhoto(email);
       // ...
     })
     .catch((error) => {
@@ -334,7 +412,7 @@ const addNewRecord = async(studentName,prnNumber,date,bookName,bookId,lastStuden
         addNewStudent(group,studentName,prnNumber,email);
         addNewStudentToGroup(studentName,prnNumber);
         const auth = getAuth();
-
+        // getUserProfilePhoto(email);
         //email verification link;
         sendEmailVerification(auth.currentUser)
         .then(() => {
@@ -383,14 +461,14 @@ const sendEmailVerificationlink = () =>{
     signOut(auth);
   };
 
-  const [user,setUser] = useState(null);
+
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
       setUser(user);
       // console.log(user.email);
       getGroupId(user.email);
-      
+      getUserProfilePhoto(user.email);
       
     // setStudent(data);
       // User is signed in, see docs for a list of available properties
@@ -413,10 +491,12 @@ const sendEmailVerificationlink = () =>{
       signInUser,
       signUpUser,
       user, 
-      grpId,    
+      grpId,  
+      UserProfilePhoto,  
       signOutUser,
       getAuthentication,
       getGroupId,
+      getUserProfilePhoto,
       addNewRecord,
       getBookRecord,
       getStudentData,
@@ -426,6 +506,7 @@ const sendEmailVerificationlink = () =>{
       updateBookAssignStatus,
       userPassReset,
       sendEmailVerificationlink,
+      uploadProfile,
     }}>
         {props.children}
     </FirebaseContext.Provider>

@@ -14,13 +14,17 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import { Link } from 'react-router-dom';
 import './NavbarStyles.css';
+import { useFirebase } from '../firebases/firebaseDB';
 
 
 function NavbarCustom() {
+  const firebase = useFirebase();
+  const [userProfile, setUserProfile] = React.useState(null);
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
   const handleOpenNavMenu = (event) => {
+   
     setAnchorElNav(event.currentTarget);
   };
   const handleOpenUserMenu = (event) => {
@@ -34,6 +38,18 @@ function NavbarCustom() {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+
+  React.useEffect(() => {
+   
+    if(firebase.user!==null)
+    {
+    setUserProfile(firebase.user);
+    console.log(userProfile?.photoURL);
+    }
+   
+  
+  
+}, []);
 
   return (
     <AppBar position="static" className="navbg-component">
@@ -136,7 +152,7 @@ function NavbarCustom() {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                <Avatar  src={userProfile?.picture} />
               </IconButton>
             </Tooltip>
             <Menu

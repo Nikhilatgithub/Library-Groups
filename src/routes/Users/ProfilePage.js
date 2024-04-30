@@ -12,6 +12,7 @@ const ProfilePage = () => {
     const firebase = useFirebase(); // Custom hook to get the current user
   const [userProfile, setUserProfile] = useState(null);
   const navigate = useNavigate();
+  const [pic,setPic] = useState(null);
   const [user, setUser] = useState({
     group: '',
     studentName: '', // Add student name field
@@ -50,7 +51,10 @@ const ProfilePage = () => {
     if(firebase.user!==null)
     {
     setUserProfile(firebase.user);
+    setPic(firebase.UserProfilePhoto);
+    console.log(pic);
     userData();
+    
     }
   }, []);
 
@@ -72,7 +76,7 @@ const ProfilePage = () => {
       <Paper style={{ padding: '16px', maxWidth: '600px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <div onClick={handleProfile}>
-          <Avatar src="/path/to/avatar.jpg" style={{ width: '96px', height: '96px', marginBottom: '16px', margin: 'auto' }} />
+          <Avatar src={pic} style={{ width: '96px', height: '96px', marginBottom: '16px', margin: 'auto' }} />
           </div>
           <Typography variant="h5" align="center" gutterBottom>
           {userProfile?.displayName}
